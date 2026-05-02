@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24512" systemVersion="24G84" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Capital" representedClassName="Capital" syncable="YES" codeGenerationType="class">
+        <attribute name="capitalName" attributeType="String"/>
+        <attribute name="numberOfCorrect" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="numberOfGuess" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="country" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Country" inverseName="capital" inverseEntity="Country"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="capitalName"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="categoryName" attributeType="String"/>
+        <relationship name="levels" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Level" inverseName="category" inverseEntity="Level"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="categoryName"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Continent" representedClassName="Continent" syncable="YES" codeGenerationType="class">
+        <attribute name="continentName" attributeType="String"/>
+        <relationship name="countries" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Country" inverseName="continent" inverseEntity="Country"/>
+        <relationship name="levels" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Level" inverseName="continent" inverseEntity="Level"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="continentName"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Country" representedClassName="Country" syncable="YES" codeGenerationType="class">
+        <attribute name="countryName" attributeType="String"/>
+        <relationship name="capital" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Capital" inverseName="country" inverseEntity="Capital"/>
+        <relationship name="continent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Continent" inverseName="countries" inverseEntity="Continent"/>
+        <relationship name="flag" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Flag" inverseName="country" inverseEntity="Flag"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="countryName"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="Flag" representedClassName="Flag" syncable="YES" codeGenerationType="class">
+        <attribute name="flagFileName" attributeType="String"/>
+        <attribute name="numberOfCorrect" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="numberOfGuess" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="country" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Country" inverseName="flag" inverseEntity="Country"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="flagFileName"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="History" representedClassName="History" syncable="YES" codeGenerationType="class">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="score" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="level" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Level" inverseName="history" inverseEntity="Level"/>
+    </entity>
+    <entity name="Level" representedClassName="Level" syncable="YES" codeGenerationType="class">
+        <attribute name="levelDescription" attributeType="String"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="levels" inverseEntity="Category"/>
+        <relationship name="continent" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Continent" inverseName="levels" inverseEntity="Continent"/>
+        <relationship name="history" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="History" inverseName="level" inverseEntity="History"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="category"/>
+                <constraint value="continent"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>
