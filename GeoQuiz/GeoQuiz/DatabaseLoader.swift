@@ -41,6 +41,19 @@ class DatabaseLoader {
         createCountries(names: oceaniaCountries, capitals: oceaniaCapitals, flags: oceaniaFlags, continent: "Oceania")
         createCountries(names: northAmericaCountries, capitals: northAmericaCapitals, flags: northAmericaFlags, continent: "North America")
         createCountries(names: southAmericaCountries, capitals: southAmericaCapitals, flags: southAmericaFlags, continent: "South America")
+        createCategories()
+        createLevel(for: "Europe", type: "Flags")
+        createLevel(for: "Europe", type: "Capitals")
+        createLevel(for: "Asia", type: "Flags")
+        createLevel(for: "Asia", type: "Capitals")
+        createLevel(for: "Africa", type: "Flags")
+        createLevel(for: "Africa", type: "Capitals")
+        createLevel(for: "Oceania", type: "Flags")
+        createLevel(for: "Oceania", type: "Capitals")
+        createLevel(for: "North America", type: "Flags")
+        createLevel(for: "North America", type: "Capitals")
+        createLevel(for: "South America", type: "Flags")
+        createLevel(for: "South America", type: "Capitals")
     }
     
     private func loadFromFile(from fileName: String) -> [String] {
@@ -126,6 +139,45 @@ class DatabaseLoader {
         }
         else {
             print("Arrays sizes not equal")
+        }
+    }
+    
+    private func createCategories() {
+        let flags = Category(context: context)
+        flags.categoryName = "Flags"
+        
+        let capitals = Category(context: context)
+        capitals.categoryName = "Capitals"
+        
+        do {
+            try context.save()
+        }
+        catch {
+            print("Failed to save context: \(error)")
+        }
+    }
+    
+    private func createLevel(for continent: String, type category: String) {
+        let level = Level(context: context)
+        level.levelDescription = "Guess the \(category.lowercased()) of countries in \(continent)"
+        
+        let continentRequest = Continent.fetchRequest()
+        let predicateContinent = NSPredicate(format: "continentName == %@", continent)
+        continentRequest.predicate = predicateContinent
+        let fetchedContinents = try? context.fetch(continentRequest)
+        level.continent = fetchedContinents?.first
+        
+        let categoryRequest = Category.fetchRequest()
+        let predicateCategory = NSPredicate(format: "categoryName == %@", category)
+        categoryRequest.predicate = predicateCategory
+        let fetchedCategories = try? context.fetch(categoryRequest)
+        level.category = fetchedCategories?.first
+        
+        do {
+            try context.save()
+        }
+        catch {
+            print("Failed to save context: \(error)")
         }
     }
 }
