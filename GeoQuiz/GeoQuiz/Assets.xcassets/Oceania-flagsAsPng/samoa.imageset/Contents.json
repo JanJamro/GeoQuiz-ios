@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "ws.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "samoa@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
