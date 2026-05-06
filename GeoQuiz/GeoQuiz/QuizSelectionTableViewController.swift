@@ -16,6 +16,8 @@ class QuizSelectionTableViewController: UITableViewController, NSFetchedResultsC
         super.viewDidLoad()
         
         title = "GeoQuiz - Select Quiz"
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 100
         loadLevelsFromDatabase()
         
     }
@@ -52,10 +54,13 @@ class QuizSelectionTableViewController: UITableViewController, NSFetchedResultsC
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Level", for: indexPath)
-        cell.detailTextLabel?.text = fetchController.object(at: indexPath).levelDescription
-        cell.textLabel?.text = "\(fetchController.object(at: indexPath).continent?.continentName ?? "Continent") \(fetchController.object(at: indexPath).category?.categoryName ?? "Category")"
-        return cell
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "Level", for: indexPath) as? LevelCell {
+            cell.descriptionLabel.text = fetchController.object(at: indexPath).levelDescription
+            cell.titleLabel.text = "\(fetchController.object(at: indexPath).continent?.continentName ?? "Continent") \(fetchController.object(at: indexPath).category?.categoryName ?? "Category")"
+            cell.titleLabel.textColor = UIColor.systemBlue
+            return cell
+        }
+        return UITableViewCell()
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
