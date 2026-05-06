@@ -21,7 +21,6 @@ class LevelViewController: UIViewController, NSFetchedResultsControllerDelegate,
     var continent: String!
     var score = 0 {
         didSet {
-            answerLabel.text = "You're right!"
             flagImageView.layer.borderColor = UIColor.green.cgColor
             capitalLabel.textColor = UIColor.green
         }
@@ -32,6 +31,7 @@ class LevelViewController: UIViewController, NSFetchedResultsControllerDelegate,
     var currentRoundCountry: Country!
     var context: NSManagedObjectContext!
     var countriesSet: Set<Country> = []
+    var alreadyGuessedCountries: [Country: Bool] = [:]
     
     
     override func viewDidLoad() {
@@ -103,30 +103,78 @@ class LevelViewController: UIViewController, NSFetchedResultsControllerDelegate,
         if textField.text != nil && textField.text != "" {
             view.isUserInteractionEnabled = false
             let answerText = textField.text!.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            
             if answerText == answer {
                 score += 1
+                alreadyGuessedCountries[currentRoundCountry] = true
+                
+                if category == "Flags" {
+                    var correct = currentRoundCountry.flag?.numberOfCorrect ?? 0
+                    correct += 1
+                    currentRoundCountry.flag?.numberOfCorrect = correct
+                }
+                else if category == "Capitals" {
+                    var correct = currentRoundCountry.capital?.numberOfCorrect ?? 0
+                    correct += 1
+                    currentRoundCountry.capital?.numberOfCorrect = correct
+                }
             }
             else {
-                answerLabel.text = "Wrong answer!"
+                alreadyGuessedCountries[currentRoundCountry] = false
+                answerLabel.text = "Correct answer was: \(answer.capitalized)"
                 flagImageView.layer.borderColor = UIColor.red.cgColor
                 capitalLabel.textColor = .red
+                answerLabel.isHidden = false
             }
-            answerLabel.isHidden = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            
+            if category == "Flags" {
+                var num = currentRoundCountry.flag?.numberOfGuess ?? 0
+                num += 1
+                currentRoundCountry.flag?.numberOfGuess = num
+            }
+            else if category == "Capitals" {
+                var num = currentRoundCountry.capital?.numberOfGuess ?? 0
+                num += 1
+                currentRoundCountry.capital?.numberOfGuess = num
+            }
+            do {
+                try context.save()
+            }
+            catch {
+                print("Unsuccessful save, error: \(error)")
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                guard let self = self else { return }
+                
                 if self.countriesSet.isEmpty {
-                    self.flagImageView.isHidden = true
-                    self.roundLabel.isHidden = true
-                    self.descriptionLabel.isHidden = true
-                    self.textField.isHidden = true
-                    self.answerLabel.isHidden = true
-                    self.guessButton.isHidden = true
-                    self.capitalLabel.text = "Your score is \(self.score)/\(self.allRounds)"
-                    self.capitalLabel.textColor = .black
-                    self.capitalLabel.isHidden = false
+                    let historyRecord = History(context: self.context)
+                    historyRecord.date = Date()
+                    historyRecord.score = Int64(self.score)
+                    historyRecord.level = self.fetchController.fetchedObjects?.first
+                    do {
+                        try self.context.save()
+                    }
+                    catch {
+                        print("Failed to save context: \(error)")
+                    }
+                    
+                    if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LevelSummary") as? LevelSummaryViewController {
+                        vc.category = self.category
+                        vc.continent = self.continent
+                        vc.score = self.score
+                        vc.maxPossibleScore = self.allRounds
+                        vc.countries = self.alreadyGuessedCountries
+                        var controllers = self.navigationController?.viewControllers
+                        controllers?.removeLast()
+                        controllers?.append(vc)
+                        self.navigationController?.setViewControllers(controllers!, animated: true)
+                    }
                 }
                 else {
                     self.prepareRound()
                 }
+                
                 self.view.isUserInteractionEnabled = true
             }
         }
