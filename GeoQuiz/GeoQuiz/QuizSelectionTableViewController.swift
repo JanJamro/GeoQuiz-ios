@@ -58,6 +58,14 @@ class QuizSelectionTableViewController: UITableViewController, NSFetchedResultsC
             cell.descriptionLabel.text = fetchController.object(at: indexPath).levelDescription
             cell.titleLabel.text = "\(fetchController.object(at: indexPath).continent?.continentName ?? "Continent") \(fetchController.object(at: indexPath).category?.categoryName ?? "Category")"
             cell.titleLabel.textColor = UIColor.systemBlue
+            cell.onTap = { [weak self] in
+                if let vc = self?.storyboard?.instantiateViewController(withIdentifier: "LevelHistoryViewController") as? LevelHistoryViewController {
+                    vc.category = self?.fetchController.object(at: indexPath).category?.categoryName
+                    vc.continent = self?.fetchController.object(at: indexPath).continent?.continentName
+                    vc.context = self?.context
+                    self?.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
             return cell
         }
         return UITableViewCell()
@@ -71,5 +79,4 @@ class QuizSelectionTableViewController: UITableViewController, NSFetchedResultsC
             navigationController?.pushViewController(vc, animated: true)
         }
     }
-
 }

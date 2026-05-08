@@ -11,6 +11,7 @@ class LevelCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var scoreHistoryButton: UIButton!
     @IBOutlet weak var descriptionLabel: UILabel!
+    var onTap: (() -> Void)?
     override func awakeFromNib() {
         super.awakeFromNib()
     }
@@ -19,5 +20,8 @@ class LevelCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
+    @IBAction func buttonPressed(_ sender: Any) {
+        onTap?()
+    }
     
 }
