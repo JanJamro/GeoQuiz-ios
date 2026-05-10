@@ -36,10 +36,10 @@ class LevelSummaryViewController: UIViewController, UITableViewDataSource, UITab
         cell.textLabel?.text = keysArray[indexPath.row].countryName ?? ""
         if let guess = countries[keysArray[indexPath.row]] {
             if guess {
-                cell.textLabel?.textColor = .green
+                cell.textLabel?.textColor = .systemGreen
             }
             else {
-                cell.textLabel?.textColor = .red
+                cell.textLabel?.textColor = .systemRed
             }
         }
         return cell

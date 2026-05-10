@@ -8,14 +8,21 @@
 import UIKit
 import CoreData
 
-class LevelHistoryViewController: UITableViewController, NSFetchedResultsControllerDelegate {
+class LevelHistoryViewController: UIViewController, NSFetchedResultsControllerDelegate, UITableViewDelegate, UITableViewDataSource {
+    @IBOutlet weak var dateTableView: UITableView!
+    @IBOutlet weak var countriesTableView: UITableView!
     var context: NSManagedObjectContext!
     var category: String!
     var continent: String!
     var fetchController: NSFetchedResultsController<History>!
+    var countries: [Country] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        dateTableView.delegate = self
+        dateTableView.dataSource = self
+        countriesTableView.delegate = self
+        countriesTableView.dataSource = self
         title = "\(continent.capitalized) \(category.capitalized) Level History"
         if fetchController == nil {
             let request = History.fetchRequest()
@@ -30,22 +37,59 @@ class LevelHistoryViewController: UITableViewController, NSFetchedResultsControl
         catch {
             print("Failed to fetch with error: \(error)")
         }
+        if let countriesSet = fetchController.fetchedObjects?.first?.level?.continent?.countries as? Set<Country> {
+            for country in countriesSet {
+                countries.append(country)
+            }
+        }
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchController.fetchedObjects?.count ?? 0
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if tableView == dateTableView {
+            return fetchController.fetchedObjects?.count ?? 0
+        }
+        
+        return fetchController.fetchedObjects?.first?.level?.continent?.countries?.count ?? 0
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryCell", for: indexPath) as? LevelHistoryCell {
-            if let date = fetchController.object(at: indexPath).date {
-                let formatter = DateFormatter()
-                formatter.dateStyle = .medium
-                formatter.timeStyle = .none
-                cell.dateLabel.text = formatter.string(from: date)
-                
-                let score = fetchController.object(at: indexPath).score
-                cell.scoreLabel.text = "\(score)"
+            if tableView == dateTableView {
+                if let date = fetchController.object(at: indexPath).date {
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .medium
+                    formatter.timeStyle = .none
+                    cell.dateOrScoreLabel.text = formatter.string(from: date)
+                    
+                    let score = fetchController.object(at: indexPath).score
+                    let max = fetchController.object(at: indexPath).level?.continent?.countries?.count ?? 0
+                    cell.scoreLabel.text = "\(score)/\(max)"
+                    return cell
+                }
+            }
+            else {
+                let country = countries[indexPath.row]
+                cell.dateOrScoreLabel.text = country.countryName
+                var guesses = 0
+                var correctGuesses = 0
+                if category == "Flags" {
+                    guesses = Int(country.flag?.numberOfGuess ?? 0)
+                    correctGuesses = Int(country.flag?.numberOfCorrect ?? 0)
+                }
+                else if category == "Capitals" {
+                    guesses = Int(country.capital?.numberOfGuess ?? 0)
+                    correctGuesses = Int(country.capital?.numberOfCorrect ?? 0)
+                }
+                cell.scoreLabel.text = "\(correctGuesses)/\(guesses)"
+                if Double(correctGuesses)/Double(guesses) > 0.8 {
+                    cell.scoreLabel.textColor = .systemGreen
+                }
+                else if Double(correctGuesses)/Double(guesses) < 0.2 {
+                    cell.scoreLabel.textColor = .systemRed
+                }
+                else {
+                    cell.scoreLabel.textColor = .black
+                }
                 return cell
             }
         }

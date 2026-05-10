@@ -8,7 +8,7 @@
 import UIKit
 
 class LevelHistoryCell: UITableViewCell {
-    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var dateOrScoreLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
     
     override func awakeFromNib() {
